@@ -1,7 +1,7 @@
 # Leo Flix
 
- * Versão Atual: 1.0
- * Data da última atualização: 
+ * Versão Atual: 1.1
+ * Data da última atualização:  23/09/2023
  * Desenvolvedor: Leonardo de Sant Ana
  * UI/UX: Leonardo de Sant Ana
 
