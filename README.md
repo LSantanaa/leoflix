@@ -30,7 +30,7 @@ No projeto você pode adicionar vídeos e categorias de sua preferência e criar
  
 **Layout**
 
-* [Figma](https://figma.com)
+* [Figma](https://www.figma.com/file/kg8jj2HgSDV9efuhoDtta5/AluraFlix-PT?node-id=1%3A432&mode=dev)
 
 **Deploy**
 

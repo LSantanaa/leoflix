@@ -1,10 +1,6 @@
 import { v4 as uuid } from "uuid";
-import { CheckCircleOutlineOutlined } from "@mui/icons-material";
 import {
-  Box,
-  Button,
   FormControl,
-  Grow,
   InputLabel,
   MenuItem,
   Select,
@@ -15,6 +11,8 @@ import { useVideoContext } from "contexts/VideosContext";
 import { useEffect, useState } from "react";
 import { extrairIDDoVideo } from "helpers/extrairId";
 import ChildModalCategoria from "./childModalCategoria";
+import BoxConfirmacao from "components/ModalBoxConfirmacao";
+import ActionButtonsForms from "components/ActionButtonsForm";
 
 export default function Formulario({ handleCloseModal }) {
   const [titulo, setTitulo] = useState("");
@@ -59,15 +57,17 @@ export default function Formulario({ handleCloseModal }) {
     if (videoEnviado) {
       const timer = setTimeout(() => {
         handleCloseModal();
-      }, 3000);
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
   }, [videoEnviado, handleCloseModal]);
 
   return (
-    <>
-      {!videoEnviado ? (
+      <BoxConfirmacao
+        textConfirmacao="Vídeo enviado com sucesso!!!"
+        confirmacao={videoEnviado}
+      >
         <form onSubmit={handleSubmit}>
           <Typography
             variant="h5"
@@ -136,9 +136,7 @@ export default function Formulario({ handleCloseModal }) {
               ))}
             </Select>
           </FormControl>
-          <ChildModalCategoria
-            addCategoria={addCategoria}
-          />
+          <ChildModalCategoria addCategoria={addCategoria} categorias={categorias} />
           <TextField
             required
             label="Descrição"
@@ -153,30 +151,8 @@ export default function Formulario({ handleCloseModal }) {
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
           />
-          <Button
-            type="submit"
-            variant="outlined"
-            sx={{
-              backgroundColor: "var(--blue-800)",
-              color: "var(--white)",
-              marginTop: "1rem",
-            }}
-            size="large"
-            fullWidth
-          >
-            Enviar
-          </Button>
+          <ActionButtonsForms textBtnSubmit="Enviar" type='submit' bgColor="var(--blue-800)" textColor="var(--white)" handleClose={handleCloseModal}/>
         </form>
-      ) : (
-        <Grow in={videoEnviado}>
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <CheckCircleOutlineOutlined sx={{ fontSize: 64, color: "green" }} />
-            <Typography variant="h6" color="textSecondary">
-              Vídeo Enviado com Sucesso!!!
-            </Typography>
-          </Box>
-        </Grow>
-      )}
-    </>
+      </BoxConfirmacao>
   );
 }
