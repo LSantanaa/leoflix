@@ -1,7 +1,7 @@
 # Leo Flix
 
- * Versão Atual: 1.0
- * Data da última atualização: 
+ * Versão Atual: 1.1
+ * Data da última atualização:  23/09/2023
  * Desenvolvedor: Leonardo de Sant Ana
  * UI/UX: Leonardo de Sant Ana
 
@@ -30,7 +30,7 @@ No projeto você pode adicionar vídeos e categorias de sua preferência e criar
  
 **Layout**
 
-* [Figma](https://figma.com)
+* [Figma](https://www.figma.com/file/kg8jj2HgSDV9efuhoDtta5/AluraFlix-PT?node-id=1%3A432&mode=dev)
 
 **Deploy**
 

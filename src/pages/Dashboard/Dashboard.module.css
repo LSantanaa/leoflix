@@ -1,7 +1,9 @@
 .tableArea {
-  padding-top: 2rem;
+  padding: 2rem;
   display: flex;
   justify-content: center;
+  flex-direction: column;
+  gap: 2rem;
   align-items: center;
   width: 800px;
   margin: 10px auto 30px;
@@ -80,10 +82,40 @@ td:last-child svg {
   box-shadow: 0px 11px 15px -7px rgba(0,0,0,0.2), 0px 24px 38px 3px rgba(0,0,0,0.14), 0px 9px 46px 8px rgba(0,0,0,0.12);
 }
 
-.flex{
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
-  margin-top: 1rem;
+
+@media screen and (max-width: 768px) {
+  .tableArea{
+    width: auto;
+  }
+}  
+
+table.mobile {
+  max-width: 350px;
+  
+  & th{
+    background-color: var(--black-800);
+  }
+
+  & td {
+    width: 100px;
+    padding: 12px;
+    text-align: center;
+  }
+  
+  & td.tdCor{
+    width: 120px;
+
+    & .selectCor{
+      width: 50%;
+    }
+  }
+  
+  & td.tdVideoDestaque{
+    width: 200px;
+  
+    & div{
+      width: 100%;
+    }
+  }
+  
 }

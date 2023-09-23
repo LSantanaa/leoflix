@@ -1,6 +1,8 @@
 import Banner from "components/Banner";
+import ButtonModalReset from "components/ButtonModalReset";
 import CategoriaCarousel from "components/CategoriasCarousel";
 import { useVideoContext } from "contexts/VideosContext";
+import SemVideos from "pages/SemVideos";
 
 function Home() {
   const { videos, categorias } = useVideoContext();
@@ -13,6 +15,14 @@ function Home() {
   const videoDestaque = videosCategoriaDestaque.find(
     (video) => video.videoDestaque
   );
+
+  if(videos.length === 0){
+    return(
+        <SemVideos>
+          <ButtonModalReset/>
+        </SemVideos>
+      )
+  }
 
   return (
     <>

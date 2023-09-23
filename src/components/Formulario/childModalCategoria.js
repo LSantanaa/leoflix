@@ -1,24 +1,26 @@
-import { CheckCircleOutlineOutlined } from "@mui/icons-material";
 import styles from "./ChildForm.module.css";
-import { Box, Button, Grow, Modal, TextField, Typography } from "@mui/material";
+import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
+import BoxConfirmacao from "components/ModalBoxConfirmacao";
+import ActionButtonsForms from "components/ActionButtonsForm";
 
-export default function ChildModalCategoria({ addCategoria }) {
+export default function ChildModalCategoria({ addCategoria, categorias }) {
   const [cor, setCor] = useState("#ffffff");
   const [nome, setNome] = useState("");
   const [open, setOpen] = useState(false);
   const [categoriaEnviada, setCategoriaEnviada] = useState(false);
+  
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
-    setOpen(false)
+    setOpen(false);
     setCategoriaEnviada(false);
-    setNome('');
+    setNome("");
   };
 
   const enviaCategoria = () => {
-    if (nome !== "") {
+    if (nome !== "" && !categorias.find(cat => cat.nome === nome)) {
       const newCategoria = { id: uuid(), nome, cor, destaque: false };
       addCategoria(newCategoria);
       setCategoriaEnviada(true);
@@ -29,7 +31,7 @@ export default function ChildModalCategoria({ addCategoria }) {
     if (categoriaEnviada) {
       const timer = setTimeout(() => {
         handleClose();
-      }, 3000);
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
@@ -70,7 +72,11 @@ export default function ChildModalCategoria({ addCategoria }) {
           >
             Nova categoria
           </Typography>
-          {!categoriaEnviada ? (
+
+          <BoxConfirmacao
+            textConfirmacao="Categoria cadastrada!"
+            confirmacao={categoriaEnviada}
+          >
             <form onSubmit={(e) => e.preventDefault()}>
               <TextField
                 value={nome}
@@ -91,41 +97,15 @@ export default function ChildModalCategoria({ addCategoria }) {
                 fullWidth
                 onChange={(e) => setCor(e.target.value)}
               />
-              <div className={styles.flex}>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  size="large"
-                  sx={{
-                    backgroundColor: "var(--blue-800)",
-                    color: "var(--white)",
-                  }}
-                  onClick={enviaCategoria}
-                >
-                  Adicionar
-                </Button>
-                <Button
-                  type="reset"
-                  onClick={handleClose}
-                  variant="outlined"
-                  size="large"
-                >
-                  Cancelar
-                </Button>
-              </div>
+              <ActionButtonsForms
+                bgColor="var(--blue-800)"
+                textColor="var(--white)"
+                onClick={enviaCategoria}
+                handleClose={handleClose}
+                textBtnSubmit="Adicionar"
+              />
             </form>
-          ) : (
-            <Grow in={categoriaEnviada}>
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <CheckCircleOutlineOutlined
-                  sx={{ fontSize: 64, color: "green" }}
-                />
-                <Typography variant="h6" color="textSecondary">
-                  Nova Categoria Adicionada
-                </Typography>
-              </Box>
-            </Grow>
-          )}
+          </BoxConfirmacao>
         </Box>
       </Modal>
     </>

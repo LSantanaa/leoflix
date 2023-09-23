@@ -2,9 +2,7 @@ import {
   Alert,
   AlertTitle,
   Box,
-  Button,
   FormControl,
-  Grow,
   IconButton,
   InputLabel,
   MenuItem,
@@ -14,9 +12,13 @@ import {
   Typography,
 } from "@mui/material";
 import styles from "./Dashboard.module.css";
-import { CheckCircleOutlineOutlined, Delete, FavoriteBorder, FavoriteOutlined } from "@mui/icons-material";
+import { Delete, FavoriteBorder, FavoriteOutlined } from "@mui/icons-material";
 import { useVideoContext } from "contexts/VideosContext";
 import { useEffect, useState } from "react";
+import BoxConfirmacao from "components/ModalBoxConfirmacao";
+import ActionButtonsForms from "components/ActionButtonsForm";
+import SemVideos from "pages/SemVideos";
+import ButtonModalReset from "components/ButtonModalReset";
 
 function ColorPicker({ categoria, onChange }) {
   const [localColor, setLocalColor] = useState(categoria.cor);
@@ -32,6 +34,8 @@ function ColorPicker({ categoria, onChange }) {
 
   return (
     <TextField
+      className={styles.selectCor}
+      id={categoria.nome}
       size="small"
       type="color"
       label="Cor"
@@ -53,9 +57,11 @@ export default function Dashboard() {
     excluirCategoria,
   } = useVideoContext();
 
-  const [openModalDel, setOpenModalDel] = useState(false);
   const [idCategoriaDelete, setIdCategoriaDelete] = useState(null);
-  const [confirmadoExclusao, setConfirmadoExclusao] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [confirmado, setConfirmado] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const initialVideoDestaquePorCategoria = categorias.reduce(
     (acc, categoria) => {
@@ -87,85 +93,100 @@ export default function Dashboard() {
   };
 
   const excluir = (cat) => {
-    setConfirmadoExclusao(true);
+    setConfirmado(true);
     excluirCategoria(cat);
   };
 
   const handleClose = () => {
-    setOpenModalDel(false);
-    setConfirmadoExclusao(false);
+    setOpenModal(false);
+    setConfirmado(false);
   };
 
   useEffect(() => {
-    if (confirmadoExclusao) {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (confirmado) {
       const timer = setTimeout(() => {
         handleClose();
-      }, 3000);
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
-  }, [confirmadoExclusao]);
+  }, [confirmado]);
+
+  if(videos.length === 0 || categorias.length === 0){
+    return(
+      <SemVideos>
+       <ButtonModalReset/>
+      </SemVideos>
+      )
+  }
 
   return (
     <section className={styles.tableArea}>
-      <table>
-        <thead>
-          <tr>
-            <th>Categorias</th>
-            <th>Cor</th>
-            <th>Quantidade de videos</th>
-            <th>Video Destaque</th>
-            <th>Banner?</th>
-            <th>Excluir?</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categorias.map((categoria) => {
+      {isMobile ? (
+        <>
+          {categorias.map((cat) => {
             const videosPorCategoria = videos.filter(
-              (video) => video.categoria === categoria.nome
+              (video) => video.categoria === cat.nome
             );
             const disabled = videosPorCategoria.length <= 0 ? true : false;
 
-            const contemVideo =
-              videos.filter((video) => video.categoria === categoria.nome)
-                .length > 0
-                ? true
-                : false;
-
             return (
-              <tr key={categoria.id}>
-                {contemVideo && (
-                  <>
-                    <td>{categoria.nome}</td>
+              <table className={styles.mobile} key={cat.id}>
+                <tbody>
+                  <tr>
+                    <th>Categoria</th>
+                    <td>{cat.nome}</td>
+                  </tr>
+                  <tr>
+                    <th>Cor</th>
                     <td className={styles.tdCor}>
                       <ColorPicker
-                        categoria={categoria}
+                        categoria={cat}
                         onChange={(newColor) =>
-                          mudarCorCategoria(newColor, categoria.id)
+                          mudarCorCategoria(newColor, cat.id)
                         }
                       />
                     </td>
-                    <td>{videosPorCategoria.length}</td>
+                  </tr>
+                  <tr>
+                    <th>Video Destaque</th>
                     <td className={styles.tdVideoDestaque}>
                       <FormControl
                         disabled={disabled}
                         margin="normal"
                         size="small"
-                        sx={{ maxWidth: 250, color: "var(--white)" }}
+                        sx={{
+                          maxWidth: 200,
+                          minWidth:200,
+                          color: "var(--white)",
+                        }}
                       >
-                        <InputLabel id={`video-${categoria.id}`}>
+                        <InputLabel id={`video-${cat.id}`}>
                           Selecione o Vídeo
                         </InputLabel>
                         <Select
-                          labelId={`video-${categoria.id}`}
-                          id={`video-${categoria.id}`}
+                          labelId={`video-${cat.id}`}
+                          id={`video-${cat.id}`}
+                          name={`video-${cat.id}`}
                           label="Selecione o Vídeo"
-                          value={videoDestaquePorCategoria[categoria.id] || ""}
+                          value={videoDestaquePorCategoria[cat.id] || ""}
                           onChange={(e) =>
                             handleVideoDestaqueChange(
-                              categoria.id,
+                              cat.id,
                               e.target.value,
-                              categoria.nome
+                              cat.nome
                             )
                           }
                         >
@@ -177,114 +198,249 @@ export default function Dashboard() {
                         </Select>
                       </FormControl>
                     </td>
+                  </tr>
+                  <tr>
+                    <th>Banner</th>
                     <td>
                       <IconButton
                         disabled={disabled}
                         variant="solid"
                         onClick={() => {
-                          mudarFavorito(categoria.id);
+                          mudarFavorito(cat.id);
                         }}
                       >
-                        {categoria.destaque ? (
+                        {cat.destaque ? (
                           <FavoriteOutlined sx={{ color: "var(--white)" }} />
                         ) : (
                           <FavoriteBorder sx={{ color: "var(--white)" }} />
                         )}
                       </IconButton>
                     </td>
-                    <td>
-                      <IconButton
-                        onClick={() => {
-                          setOpenModalDel(true);
-                          setIdCategoriaDelete({
-                            id: categoria.id,
-                            nome: categoria.nome,
-                          });
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                      <Modal
-                        open={openModalDel}
-                        onClose={handleClose}
-                        aria-labelledby="modal para confirmar exclusão de categorias e videos"
-                        aria-describedby="Confirme ou Cancele a exclusão da categoria e dos videos da categoria"
-                      >
-                        <Box className={styles.boxModalDel}>
-                          {!confirmadoExclusao ?(
-                          <>
-                          <Alert
-                            severity="warning"
-                            variant="outlined"
-                            sx={{
-                              mb: 2,
-                              fontFamily: "var(--font-padrao)",
-                              fontSize: "1.1rem",
-                            }}
-                          >
-                            <AlertTitle>Atenção!</AlertTitle>
-                            Excluir a categoria também excluíra todos os vídeos
-                            dessa categoria.
-                          </Alert>
-                          <Typography
-                            fontFamily={"var(--font-padrao)"}
-                            textAlign={"center"}
-                            fontSize={"1.2rem"}
-                          >
-                            Você deseja confirmar a exclusão?
-                          </Typography>
-                          <div className={styles.flex}>
-                            <Button
-                              onClick={() => excluir(idCategoriaDelete)}
-                              type="button"
-                              variant="outlined"
-                              fullWidth
-                              sx={{
-                                backgroundColor: "var(--red-600)",
-                                ":hover": {
-                                  backgroundColor: "var(--red-800)",
-                                  borderColor: "var(--red-700)",
-                                },
-                                color: "var(--white)",
-                              }}
+                  </tr>
+                  <tr>
+                    <th>Deletar</th>
+                    <td> <IconButton
+                          onClick={() => {
+                            setOpenModal(true);
+                            setIdCategoriaDelete({
+                              id: cat.id,
+                              nome: cat.nome,
+                            });
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                        <Modal
+                          open={openModal}
+                          onClose={() => handleClose()}
+                          aria-labelledby="modal para confirmar exclusão de categorias e videos"
+                          aria-describedby="Confirme ou Cancele a exclusão da categoria e dos videos da categoria"
+                        >
+                          <Box className={styles.boxModalDel}>
+                            <BoxConfirmacao
+                              confirmacao={confirmado}
+                              textConfirmacao="Excluído com sucesso!"
                             >
-                              Confirma
-                            </Button>
-                            <Button
-                              onClick={handleClose}
-                              variant="outlined"
-                              fullWidth
-                            >
-                              Cancelar
-                            </Button>
-                          </div>
-                          </>
-                          ):(
-                          <Grow in={confirmadoExclusao}>
-                            <Box
-                              display="flex"
-                              flexDirection="column"
-                              alignItems="center"
-                            >
-                              <CheckCircleOutlineOutlined
-                                sx={{ fontSize: 64, color: "green" }}
-                              />
-                              <Typography variant="h6" color="textSecondary">
-                                Excluído com sucesso
+                              <Alert
+                                severity="warning"
+                                variant="outlined"
+                                sx={{
+                                  mb: 2,
+                                  fontFamily: "var(--font-padrao)",
+                                  fontSize: "1.1rem",
+                                }}
+                              >
+                                <AlertTitle>Atenção!</AlertTitle>
+                                Excluir a categoria também excluíra todos os
+                                vídeos dessa categoria.
+                              </Alert>
+                              <Typography
+                                fontFamily={"var(--font-padrao)"}
+                                textAlign={"center"}
+                                fontSize={"1.2rem"}
+                              >
+                                Você deseja confirmar a exclusão?
                               </Typography>
-                            </Box>
-                          </Grow>
-                          )}
-                        </Box>
-                      </Modal>
-                    </td>
-                  </>
-                )}
-              </tr>
+
+                              <ActionButtonsForms
+                                bgColor="var(--red-600)"
+                                hover="var(--red-800)"
+                                textColor="var(--white)"
+                                onClick={() => excluir(idCategoriaDelete)}
+                                handleClose={() =>
+                                  handleClose()
+                                }
+                                textBtnSubmit="Confirmar"
+                              />
+                            </BoxConfirmacao>
+                          </Box>
+                        </Modal></td>
+                  </tr>
+                </tbody>
+              </table>
             );
           })}
-        </tbody>
-      </table>
+        </>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Categorias</th>
+              <th>Cor</th>
+              <th>Quantidade de videos</th>
+              <th>Video Destaque</th>
+              <th>Banner</th>
+              <th>Excluir?</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categorias.map((categoria) => {
+              const videosPorCategoria = videos.filter(
+                (video) => video.categoria === categoria.nome
+              );
+              const disabled = videosPorCategoria.length <= 0 ? true : false;
+
+              const contemVideo =
+                videos.filter((video) => video.categoria === categoria.nome)
+                  .length > 0
+                  ? true
+                  : false;
+
+              return (
+                <tr key={categoria.id}>
+                  {contemVideo && (
+                    <>
+                      <td>{categoria.nome}</td>
+                      <td className={styles.tdCor}>
+                        <ColorPicker
+                          categoria={categoria}
+                          onChange={(newColor) =>
+                            mudarCorCategoria(newColor, categoria.id)
+                          }
+                        />
+                      </td>
+                      <td>{videosPorCategoria.length}</td>
+                      <td className={styles.tdVideoDestaque}>
+                        <FormControl
+                          disabled={disabled}
+                          margin="normal"
+                          size="small"
+                          sx={{ maxWidth: 250, color: "var(--white)" }}
+                        >
+                          <InputLabel id={`video-${categoria.id}`}>
+                            Selecione o Vídeo
+                          </InputLabel>
+                          <Select
+                            labelId={`video-${categoria.id}`}
+                            id={`video-${categoria.id}`}
+                            name={`video-${categoria.id}`}
+                            label="Selecione o Vídeo"
+                            value={
+                              videoDestaquePorCategoria[categoria.id] || ""
+                            }
+                            onChange={(e) =>
+                              handleVideoDestaqueChange(
+                                categoria.id,
+                                e.target.value,
+                                categoria.nome
+                              )
+                            }
+                          >
+                            {videosPorCategoria.map((video) => (
+                              <MenuItem key={video.id} value={video.id}>
+                                {video.titulo}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </td>
+                      <td>
+                        <IconButton
+                          disabled={disabled}
+                          variant="solid"
+                          onClick={() => {
+                            mudarFavorito(categoria.id);
+                          }}
+                        >
+                          {categoria.destaque ? (
+                            <FavoriteOutlined sx={{ color: "var(--white)" }} />
+                          ) : (
+                            <FavoriteBorder sx={{ color: "var(--white)" }} />
+                          )}
+                        </IconButton>
+                      </td>
+                      <td>
+                        <IconButton
+                          onClick={() => {
+                            setOpenModal((prevState) => ({
+                              ...prevState,
+                              modalDel: true,
+                            }));
+                            setIdCategoriaDelete({
+                              id: categoria.id,
+                              nome: categoria.nome,
+                            });
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                        <Modal
+                          open={openModal}
+                          onClose={() => handleClose()}
+                          aria-labelledby="modal para confirmar exclusão de categorias e videos"
+                          aria-describedby="Confirme ou Cancele a exclusão da categoria e dos videos da categoria"
+                        >
+                          <Box className={styles.boxModalDel}>
+                            <BoxConfirmacao
+                              confirmacao={confirmado}
+                              textConfirmacao="Excluído com sucesso!"
+                            >
+                              <Alert
+                                severity="warning"
+                                variant="outlined"
+                                sx={{
+                                  mb: 2,
+                                  fontFamily: "var(--font-padrao)",
+                                  fontSize: "1.1rem",
+                                }}
+                              >
+                                <AlertTitle>Atenção!</AlertTitle>
+                                Excluir a categoria também excluíra todos os
+                                vídeos dessa categoria.
+                              </Alert>
+                              <Typography
+                                fontFamily={"var(--font-padrao)"}
+                                textAlign={"center"}
+                                fontSize={"1.2rem"}
+                              >
+                                Você deseja confirmar a exclusão?
+                              </Typography>
+
+                              <ActionButtonsForms
+                                bgColor="var(--red-600)"
+                                hover="var(--red-800)"
+                                textColor="var(--white)"
+                                onClick={() => excluir(idCategoriaDelete)}
+                                handleClose={() =>
+                                  handleClose()
+                                }
+                                textBtnSubmit="Confirmar"
+                              />
+                            </BoxConfirmacao>
+                          </Box>
+                        </Modal>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+
+    <ButtonModalReset/>
+   
     </section>
   );
 }
