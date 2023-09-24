@@ -20,6 +20,8 @@ export function VideoEditProvider({ children }) {
     setVideoToEdit(null);
   };
 
+
+
   return (
     <VideoEditContext.Provider
       value={{

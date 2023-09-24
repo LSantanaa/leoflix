@@ -129,17 +129,25 @@ export function DashboardProvider({ children }) {
     localStorage.setItem("categorias", JSON.stringify(categoriasAtualizadas));
   };
 
+  const excluirVideo = (idVideo) => {
+    const videosAtualizados = videos.filter((video) => video.id !== idVideo);
+
+    localStorage.setItem("videos", JSON.stringify(videosAtualizados));
+    setVideos(videosAtualizados);
+  };
+
   return (
     <DashboardContext.Provider
       value={{
-        addVideo,
         videos,
         categorias,
+        addVideo,
         addCategoria,
         mudarCorCategoria,
         mudarFavorito,
-        mudarVideoFavorito,
         excluirCategoria,
+        mudarVideoFavorito,
+        excluirVideo,
       }}
     >
       {children}

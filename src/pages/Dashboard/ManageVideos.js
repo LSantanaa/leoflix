@@ -4,15 +4,25 @@ import { useDashboardContext } from "contexts/DashboardConfigContext";
 import styles from './DashboardVideos.module.css';
 import { useModalFormContext } from "contexts/ModalFormContext";
 import { useVideoEditContext } from "contexts/VideoEditContext";
+import SemVideos from "pages/SemVideos";
+import ButtonModalReset from "components/ButtonModalReset";
 
 export default function ManageVideos() {
-  const { videos } = useDashboardContext();
+  const { videos, excluirVideo } = useDashboardContext();
   const {openModal} = useModalFormContext()
   const {startEditing} = useVideoEditContext()
 
   const handleClick = (video)=>{
     startEditing(video)
     openModal()
+  }
+
+  if (videos.length === 0) {
+    return (
+      <SemVideos>
+        <ButtonModalReset />
+      </SemVideos>
+    );
   }
 
   return (
@@ -41,7 +51,7 @@ export default function ManageVideos() {
                 </IconButton>
               </td>
               <td>
-                 <IconButton>
+                 <IconButton onClick={()=>excluirVideo(video.id)}>
                   <Delete/>
                  </IconButton>
               </td>
