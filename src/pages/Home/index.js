@@ -1,11 +1,11 @@
 import Banner from "components/Banner";
 import ButtonModalReset from "components/ButtonModalReset";
 import CategoriaCarousel from "components/CategoriasCarousel";
-import { useVideoContext } from "contexts/VideosContext";
+import { useDashboardContext } from "contexts/DashboardConfigContext";
 import SemVideos from "pages/SemVideos";
 
 function Home() {
-  const { videos, categorias } = useVideoContext();
+  const { videos, categorias } = useDashboardContext();
 
   const categoriaDestaque = categorias.find((categoria) => categoria.destaque);
 

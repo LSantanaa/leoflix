@@ -2,8 +2,10 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import styles from "./DefaultPage.module.css";
 import Footer from "components/Footer";
 import Header from "components/Header";
-import { VideoProvider } from "contexts/VideosContext";
+import { DashboardProvider } from "contexts/DashboardConfigContext";
 import { Outlet } from "react-router-dom";
+import { VideoEditProvider } from "contexts/VideoEditContext";
+import { ModalFormProvider } from "contexts/ModalFormContext";
 
 const darkTheme = createTheme({
   palette: {
@@ -16,10 +18,14 @@ function DefaultPage() {
     <div className={styles.flex}>
       <div className={styles.flexContent}>
         <ThemeProvider theme={darkTheme}>
-          <VideoProvider>
-            <Header />
-            <Outlet />
-          </VideoProvider>
+          <DashboardProvider>
+            <VideoEditProvider>
+              <ModalFormProvider>
+                <Header />
+                <Outlet />
+              </ModalFormProvider>
+            </VideoEditProvider>
+          </DashboardProvider>
         </ThemeProvider>
       </div>
       <Footer />

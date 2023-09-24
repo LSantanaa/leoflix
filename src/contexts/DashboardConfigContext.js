@@ -1,13 +1,13 @@
 import db from "json/db.json";
 import React, { createContext, useContext, useState } from "react";
 
-const VideoContext = createContext();
+const DashboardContext = createContext();
 
-export function useVideoContext() {
-  return useContext(VideoContext);
+export function useDashboardContext() {
+  return useContext(DashboardContext);
 }
 
-export function VideoProvider({ children }) {
+export function DashboardProvider({ children }) {
   const localVideos = JSON.parse(localStorage.getItem("videos"));
   const localCategorias = JSON.parse(localStorage.getItem("categorias"));
 
@@ -34,8 +34,20 @@ export function VideoProvider({ children }) {
       newVideo.videoDestaque = true;
     }
 
-    localStorage.setItem("videos", JSON.stringify([newVideo, ...videos]));
-    setVideos([newVideo, ...videos]);
+    const verificaVideoEditado = videos.find(
+      (video) => video.id === newVideo.id
+    );
+
+    if (verificaVideoEditado) {
+      const updateVideos = videos.map((video) =>
+        video.id === newVideo.id ? newVideo : video
+      );
+      localStorage.setItem("videos", JSON.stringify(updateVideos));
+      setVideos(updateVideos);
+    } else {
+      localStorage.setItem("videos", JSON.stringify([newVideo, ...videos]));
+      setVideos([newVideo, ...videos]);
+    }
   };
 
   const addCategoria = (categoria) => {
@@ -118,7 +130,7 @@ export function VideoProvider({ children }) {
   };
 
   return (
-    <VideoContext.Provider
+    <DashboardContext.Provider
       value={{
         addVideo,
         videos,
@@ -131,6 +143,6 @@ export function VideoProvider({ children }) {
       }}
     >
       {children}
-    </VideoContext.Provider>
+    </DashboardContext.Provider>
   );
 }
