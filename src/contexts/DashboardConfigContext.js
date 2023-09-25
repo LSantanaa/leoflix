@@ -129,12 +129,58 @@ export function DashboardProvider({ children }) {
     localStorage.setItem("categorias", JSON.stringify(categoriasAtualizadas));
   };
 
-  const excluirVideo = (idVideo) => {
-    const videosAtualizados = videos.filter((video) => video.id !== idVideo);
+  const excluirVideo = (videoExcluido) => {
+    const videosAtualizados = videos.filter(
+      (video) => video.id !== videoExcluido.id
+    );
+
+    if (videoExcluido.videoDestaque) {
+      const videosNaMesmaCategoria = videosAtualizados.filter(
+        (video) => video.categoria === videoExcluido.categoria
+      );
+      const temVideoDestaque = videosNaMesmaCategoria.some(
+        (video) => video.videoDestaque
+      );
+      if (!temVideoDestaque) {
+        const primeiroVideoIndex = videosAtualizados.findIndex(
+          (video) => video.categoria === videoExcluido.categoria
+        );
+        if (primeiroVideoIndex !== -1) {
+          videosAtualizados[primeiroVideoIndex].videoDestaque = true;
+        }
+      }
+      const temVideosNaCategoria = categoriaTemVideos(
+        videoExcluido.categoria,
+        videosAtualizados
+      );
+
+      if (!temVideosNaCategoria) {
+        const categoriasComVideos = categorias.filter((categoria) =>
+          categoriaTemVideos(categoria.nome, videosAtualizados)
+        );
+        if (categoriasComVideos.length > 0) {
+          const primeiraCategoriaComVideos = categoriasComVideos[0].nome;
+          const categoriasAtualizadas = categorias.map((cat) => {
+            if (cat.nome === primeiraCategoriaComVideos) {
+              cat.destaque = true;
+            }else{
+              cat.destaque = false;
+            }
+            return cat;
+          });
+          localStorage.setItem("categorias", JSON.stringify(categoriasAtualizadas));
+          setCategorias(categoriasAtualizadas);
+        }
+      }
+    }
 
     localStorage.setItem("videos", JSON.stringify(videosAtualizados));
     setVideos(videosAtualizados);
   };
+
+  function categoriaTemVideos(categoria, videos) {
+    return videos.some((video) => video.categoria === categoria);
+  }
 
   return (
     <DashboardContext.Provider

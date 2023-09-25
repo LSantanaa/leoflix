@@ -38,6 +38,7 @@ export default function ManageVideos() {
         </thead>
         <tbody>
           {videos.map(video => (
+          
           <tr key={video.id}>
               <td>
                 {video.titulo}
@@ -51,7 +52,7 @@ export default function ManageVideos() {
                 </IconButton>
               </td>
               <td>
-                 <IconButton onClick={()=>excluirVideo(video.id)}>
+                 <IconButton onClick={()=>excluirVideo(video)}>
                   <Delete/>
                  </IconButton>
               </td>
