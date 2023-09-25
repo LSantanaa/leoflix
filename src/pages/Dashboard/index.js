@@ -1,3 +1,4 @@
+import styles from "./Dashboard.module.css";
 import {
   Alert,
   AlertTitle,
@@ -11,14 +12,20 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import styles from "./Dashboard.module.css";
-import { Delete, FavoriteBorder, FavoriteOutlined } from "@mui/icons-material";
-import { useVideoContext } from "contexts/VideosContext";
+import Button from "@mui/material/Button";
+import {
+  Delete,
+  FavoriteBorder,
+  FavoriteOutlined,
+  VideoSettings,
+} from "@mui/icons-material";
+import { useDashboardContext } from "contexts/DashboardConfigContext";
 import { useEffect, useState } from "react";
 import BoxConfirmacao from "components/ModalBoxConfirmacao";
 import ActionButtonsForms from "components/ActionButtonsForm";
 import SemVideos from "pages/SemVideos";
 import ButtonModalReset from "components/ButtonModalReset";
+import { Link } from "react-router-dom";
 
 function ColorPicker({ categoria, onChange }) {
   const [localColor, setLocalColor] = useState(categoria.cor);
@@ -55,7 +62,7 @@ export default function Dashboard() {
     mudarFavorito,
     mudarVideoFavorito,
     excluirCategoria,
-  } = useVideoContext();
+  } = useDashboardContext();
 
   const [idCategoriaDelete, setIdCategoriaDelete] = useState(null);
   const [openModal, setOpenModal] = useState(false);
@@ -124,12 +131,12 @@ export default function Dashboard() {
     }
   }, [confirmado]);
 
-  if(videos.length === 0 || categorias.length === 0){
-    return(
+  if (videos.length === 0 || categorias.length === 0) {
+    return (
       <SemVideos>
-       <ButtonModalReset/>
+        <ButtonModalReset />
       </SemVideos>
-      )
+    );
   }
 
   return (
@@ -169,7 +176,7 @@ export default function Dashboard() {
                         size="small"
                         sx={{
                           maxWidth: 200,
-                          minWidth:200,
+                          minWidth: 200,
                           color: "var(--white)",
                         }}
                       >
@@ -219,62 +226,63 @@ export default function Dashboard() {
                   </tr>
                   <tr>
                     <th>Deletar</th>
-                    <td> <IconButton
-                          onClick={() => {
-                            setOpenModal(true);
-                            setIdCategoriaDelete({
-                              id: cat.id,
-                              nome: cat.nome,
-                            });
-                          }}
-                        >
-                          <Delete />
-                        </IconButton>
-                        <Modal
-                          open={openModal}
-                          onClose={() => handleClose()}
-                          aria-labelledby="modal para confirmar exclusão de categorias e videos"
-                          aria-describedby="Confirme ou Cancele a exclusão da categoria e dos videos da categoria"
-                        >
-                          <Box className={styles.boxModalDel}>
-                            <BoxConfirmacao
-                              confirmacao={confirmado}
-                              textConfirmacao="Excluído com sucesso!"
+                    <td>
+                      {" "}
+                      <IconButton
+                        onClick={() => {
+                          setOpenModal(true);
+                          setIdCategoriaDelete({
+                            id: cat.id,
+                            nome: cat.nome,
+                          });
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                      <Modal
+                        open={openModal}
+                        onClose={() => handleClose()}
+                        aria-labelledby="modal para confirmar exclusão de categorias e videos"
+                        aria-describedby="Confirme ou Cancele a exclusão da categoria e dos videos da categoria"
+                      >
+                        <Box className={styles.boxModalDel}>
+                          <BoxConfirmacao
+                            confirmacao={confirmado}
+                            textConfirmacao="Excluído com sucesso!"
+                          >
+                            <Alert
+                              severity="warning"
+                              variant="outlined"
+                              sx={{
+                                mb: 2,
+                                fontFamily: "var(--font-padrao)",
+                                fontSize: "1.1rem",
+                              }}
                             >
-                              <Alert
-                                severity="warning"
-                                variant="outlined"
-                                sx={{
-                                  mb: 2,
-                                  fontFamily: "var(--font-padrao)",
-                                  fontSize: "1.1rem",
-                                }}
-                              >
-                                <AlertTitle>Atenção!</AlertTitle>
-                                Excluir a categoria também excluíra todos os
-                                vídeos dessa categoria.
-                              </Alert>
-                              <Typography
-                                fontFamily={"var(--font-padrao)"}
-                                textAlign={"center"}
-                                fontSize={"1.2rem"}
-                              >
-                                Você deseja confirmar a exclusão?
-                              </Typography>
+                              <AlertTitle>Atenção!</AlertTitle>
+                              Excluir a categoria também excluíra todos os
+                              vídeos dessa categoria.
+                            </Alert>
+                            <Typography
+                              fontFamily={"var(--font-padrao)"}
+                              textAlign={"center"}
+                              fontSize={"1.2rem"}
+                            >
+                              Você deseja confirmar a exclusão?
+                            </Typography>
 
-                              <ActionButtonsForms
-                                bgColor="var(--red-600)"
-                                hover="var(--red-800)"
-                                textColor="var(--white)"
-                                onClick={() => excluir(idCategoriaDelete)}
-                                handleClose={() =>
-                                  handleClose()
-                                }
-                                textBtnSubmit="Confirmar"
-                              />
-                            </BoxConfirmacao>
-                          </Box>
-                        </Modal></td>
+                            <ActionButtonsForms
+                              bgColor="var(--red-600)"
+                              hover="var(--red-800)"
+                              textColor="var(--white)"
+                              onClick={() => excluir(idCategoriaDelete)}
+                              handleClose={() => handleClose()}
+                              textBtnSubmit="Confirmar"
+                            />
+                          </BoxConfirmacao>
+                        </Box>
+                      </Modal>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -372,10 +380,7 @@ export default function Dashboard() {
                       <td>
                         <IconButton
                           onClick={() => {
-                            setOpenModal((prevState) => ({
-                              ...prevState,
-                              modalDel: true,
-                            }));
+                            setOpenModal(true);
                             setIdCategoriaDelete({
                               id: categoria.id,
                               nome: categoria.nome,
@@ -421,9 +426,7 @@ export default function Dashboard() {
                                 hover="var(--red-800)"
                                 textColor="var(--white)"
                                 onClick={() => excluir(idCategoriaDelete)}
-                                handleClose={() =>
-                                  handleClose()
-                                }
+                                handleClose={() => handleClose()}
                                 textBtnSubmit="Confirmar"
                               />
                             </BoxConfirmacao>
@@ -439,8 +442,20 @@ export default function Dashboard() {
         </table>
       )}
 
-    <ButtonModalReset/>
-   
+      <div className={styles.flex}>
+        <ButtonModalReset />
+        <Button
+          component={Link}
+          className={styles.button}
+          endIcon={<VideoSettings />}
+          variant="outlined"
+          size="large"
+          aria-label="adicionar novo vídeo"
+          to="/dashboard-videos"
+        >
+          Gerenciar Vídeos
+        </Button>
+      </div>
     </section>
   );
 }

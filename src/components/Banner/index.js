@@ -39,6 +39,7 @@ function Banner({ outrosVideosDaCategoria, categoriaDestaque, videoDestaque }) {
           </div>
           <div>
             <iframe
+            style={{border: `3px solid ${categoriaDestaque.cor}`}}
               width="560"
               height="315"
               src={videoDestaque.linkEmbed}

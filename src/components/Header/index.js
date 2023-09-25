@@ -4,13 +4,18 @@ import Button from "@mui/material/Button"
 import { Box, Modal } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Add, Dashboard } from "@mui/icons-material";
-import { useState } from "react";
+import { useModalFormContext } from "contexts/ModalFormContext";
+import { useVideoEditContext } from "contexts/VideoEditContext";
 
 function Header() {
-  const [open, setOpen] = useState(false);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const {isOpen, closeModal, openModal} = useModalFormContext();
+  const {stopEditing} = useVideoEditContext();
+
+  const handleClose = ()=>{
+    closeModal();
+    stopEditing();
+  }
 
   return (
     <header className={styles.container}>
@@ -35,14 +40,14 @@ function Header() {
           size="large"
           endIcon={<Add />}
           aria-label="adicionar novo vídeo"
-          onClick={handleOpen}
+          onClick={openModal}
         >
           Novo Vídeo
         </Button>
       </div>
 
       <Modal
-        open={open}
+        open={isOpen}
         onClose={handleClose}
         aria-labelledby="formulário de adição de video"
         aria-describedby="adicione um novo vídeo ao LeoFlix"

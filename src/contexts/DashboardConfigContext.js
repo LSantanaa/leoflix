@@ -1,13 +1,13 @@
 import db from "json/db.json";
 import React, { createContext, useContext, useState } from "react";
 
-const VideoContext = createContext();
+const DashboardContext = createContext();
 
-export function useVideoContext() {
-  return useContext(VideoContext);
+export function useDashboardContext() {
+  return useContext(DashboardContext);
 }
 
-export function VideoProvider({ children }) {
+export function DashboardProvider({ children }) {
   const localVideos = JSON.parse(localStorage.getItem("videos"));
   const localCategorias = JSON.parse(localStorage.getItem("categorias"));
 
@@ -34,8 +34,20 @@ export function VideoProvider({ children }) {
       newVideo.videoDestaque = true;
     }
 
-    localStorage.setItem("videos", JSON.stringify([newVideo, ...videos]));
-    setVideos([newVideo, ...videos]);
+    const verificaVideoEditado = videos.find(
+      (video) => video.id === newVideo.id
+    );
+
+    if (verificaVideoEditado) {
+      const updateVideos = videos.map((video) =>
+        video.id === newVideo.id ? newVideo : video
+      );
+      localStorage.setItem("videos", JSON.stringify(updateVideos));
+      setVideos(updateVideos);
+    } else {
+      localStorage.setItem("videos", JSON.stringify([newVideo, ...videos]));
+      setVideos([newVideo, ...videos]);
+    }
   };
 
   const addCategoria = (categoria) => {
@@ -117,20 +129,74 @@ export function VideoProvider({ children }) {
     localStorage.setItem("categorias", JSON.stringify(categoriasAtualizadas));
   };
 
+  const excluirVideo = (videoExcluido) => {
+    const videosAtualizados = videos.filter(
+      (video) => video.id !== videoExcluido.id
+    );
+
+    if (videoExcluido.videoDestaque) {
+      const videosNaMesmaCategoria = videosAtualizados.filter(
+        (video) => video.categoria === videoExcluido.categoria
+      );
+      const temVideoDestaque = videosNaMesmaCategoria.some(
+        (video) => video.videoDestaque
+      );
+      if (!temVideoDestaque) {
+        const primeiroVideoIndex = videosAtualizados.findIndex(
+          (video) => video.categoria === videoExcluido.categoria
+        );
+        if (primeiroVideoIndex !== -1) {
+          videosAtualizados[primeiroVideoIndex].videoDestaque = true;
+        }
+      }
+      const temVideosNaCategoria = categoriaTemVideos(
+        videoExcluido.categoria,
+        videosAtualizados
+      );
+
+      if (!temVideosNaCategoria) {
+        const categoriasComVideos = categorias.filter((categoria) =>
+          categoriaTemVideos(categoria.nome, videosAtualizados)
+        );
+        if (categoriasComVideos.length > 0) {
+          const primeiraCategoriaComVideos = categoriasComVideos[0].nome;
+          const categoriasAtualizadas = categorias.map((cat) => {
+            if (cat.nome === primeiraCategoriaComVideos) {
+              cat.destaque = true;
+            }else{
+              cat.destaque = false;
+            }
+            return cat;
+          });
+          localStorage.setItem("categorias", JSON.stringify(categoriasAtualizadas));
+          setCategorias(categoriasAtualizadas);
+        }
+      }
+    }
+
+    localStorage.setItem("videos", JSON.stringify(videosAtualizados));
+    setVideos(videosAtualizados);
+  };
+
+  function categoriaTemVideos(categoria, videos) {
+    return videos.some((video) => video.categoria === categoria);
+  }
+
   return (
-    <VideoContext.Provider
+    <DashboardContext.Provider
       value={{
-        addVideo,
         videos,
         categorias,
+        addVideo,
         addCategoria,
         mudarCorCategoria,
         mudarFavorito,
-        mudarVideoFavorito,
         excluirCategoria,
+        mudarVideoFavorito,
+        excluirVideo,
       }}
     >
       {children}
-    </VideoContext.Provider>
+    </DashboardContext.Provider>
   );
 }
